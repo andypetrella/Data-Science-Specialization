@@ -1,0 +1,11 @@
+.Rproj*
+.RData
+.Rhistory
+data
+specdata
+*.proj
+*.csv
+*.xlsx
+*.for
+*.Rproj
+*.xml
