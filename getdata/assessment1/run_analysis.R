@@ -1,6 +1,46 @@
 print("This is the source for the Peer Assessment of the Coursera course
 Getting and Cleaning Data, cf https://class.coursera.org/getdata-002/human_grading")
 
+## Some tools ##
+
+get.or.compute <- function(var.name, compute, env = parent.frame()) {
+  value <- mget(var.name, env, ifnotfound=list(NULL))[[var.name]]
+  if (is.null(value)) {
+    print(paste(c("Computing ", var.name), sep=""))
+    value <- eval(compute, envir=env)
+    assign(var.name, value, envir = env)    
+  } else {
+    print(paste(c("Using memoized value of ", var.name), sep=""))
+    value
+  }
+}
+
+rm.rf <- function(env = parent.frame()) {
+  # This function helps in removing all variables in the current env
+  # This is particularly helpful because we're memoizing results of intensive
+  # computations like reading the data files in R objects
+  rm(list=ls(env), envir=env)
+}
+
+read.das.crap <- function(file) {
+  # This function aims to read the data files (the collected measures).
+  # Since this text files have leading white chars and may have one or more 
+  # blank chars separating the values, it's rather hard to use classical
+  # read.* functions
+  lines <- readLines(file)
+  closeAllConnections() 
+  
+  cleaned.lines <- gsub("^ +", "", lines)
+  
+  splitted <- strsplit(cleaned.lines, " ( )*", perl=T)
+  
+  data <- as.data.frame(do.call("rbind", splitted))
+  
+  data
+}
+################
+
+
 data.url <- "https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip"
 print(paste("Data source will be", data.url, sep=" "))
 
@@ -24,55 +64,26 @@ for (file in list.files("./data/expanded/UCI\ HAR\ Dataset/train")) print(file)
 print(" > Files in data Test")
 for (file in list.files("./data/expanded/UCI\ HAR\ Dataset/test")) print(file)
 
-rm.rf <- function() {
-  # This function helps in removing all variables in the current env
-  # This is particularly helpful because we're memoizing results of intensive
-  # computations like reading the data files in R objects
-  print(ls())
-  rm(list=ls())
-}
 
 print("Work")
 print("Read features")
 features.name <- read.delim("./data/expanded/UCI\ HAR\ Dataset/features.txt", sep=" ", header=F, stringsAsFactors=F)[[2]]
 
-read.das.crap <- function(file) {
-  # This function aims to read the data files (the collected measures).
-  # Since this text files have leading white chars and may have one or more 
-  # blank chars separating the values, it's rather hard to use classical
-  # read.* functions
-  lines <- readLines(file)
-  closeAllConnections() 
-  
-  cleaned.lines <- gsub("^ +", "", lines)
-  
-  splitted <- strsplit(cleaned.lines, " ( )*", perl=T)
-  
-  data <- as.data.frame(do.call("rbind", splitted))
-  names(data) <- features.name
-  
-  data
-}
+get.or.compute("data.train",  {
+  value <- read.das.crap("./data/expanded/UCI\ HAR\ Dataset/train/X_train.txt")
+  names(value) <- features.name
+  value
+})
+get.or.compute("data.test",  {
+  value <- read.das.crap("./data/expanded/UCI\ HAR\ Dataset/test/X_test.txt")
+  names(value) <- features.name
+  value
+})
 
-if (!"data.train" %in% ls()) {
-  print("Read train data")
-  data.train <- read.das.crap("./data/expanded/UCI\ HAR\ Dataset/train/X_train.txt")
-} else {
-  warning("Train data not read, `data.train` is already present")
-}
-if (!"data.test" %in% ls()) {
-  print("Read test data")
-  data.test <- read.das.crap("./data/expanded/UCI\ HAR\ Dataset/test/X_test.txt")
-} else {
-  warning("Test data not read, `data.test` is already present")
-}
+get.or.compute("data.full",  {
+  rbind(data.train, data.test)
+})
 
-if (!"data.full" %in% ls()) {
-  print("Binding the two sets into a single one: `data.full`")
-  data.full <- rbind(data.train, data.test)
-} else {
-  warning("Full data not read, `data.full` is already present")
-}
 
 print("The result of #1 is `data.full`")
 
@@ -92,11 +103,29 @@ keep.them <- function(data, us) {
   data[, cols.kept]
 }
 
-if (!"data.mean.std" %in% ls()) {
-  print("Stripping `data.full`, keeping only mean and std of the measurements")
-  data.mean.std <- keep.them(data.full, c("mean", "std"))
-} else {
-  warning("Full data not stripped, `data.mean.std` is already present")
-}
+get.or.compute("data.mean.std", {
+  keep.them(data.full, c("mean", "std"))
+})
 
 print("The result of #2 is `data.mean.std`")
+
+
+print("Read the activity labels")
+activity.labels <- read.delim("./data/expanded/UCI HAR Dataset/activity_labels.txt", sep=" ", header=F)
+
+print("Read the assigned labels")
+get.or.compute("train.label",  {
+  read.delim("./data/expanded/UCI\ HAR\ Dataset/train/y_train.txt", sep=" ", header=F)
+})
+get.or.compute("test.label",  {
+  read.delim("./data/expanded/UCI\ HAR\ Dataset/test/y_test.txt", sep=" ", header=F)
+})
+get.or.compute("full.label",  {
+  rbind(train.label, test.label)
+})
+get.or.compute("full.activity",  {
+  merge(full.label, activity.labels, by.x="V1", by.y="V1")$V2
+})
+
+print("The result of #3 is `full.activity`")
+
