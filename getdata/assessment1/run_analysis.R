@@ -190,3 +190,5 @@ write.df <- function(name, df) {
   )
 }
 mapply(write.df, names(mean.per.pop.per.activity), mean.per.pop.per.activity)
+
+print("The result of #4 are in the data/output folder (wrote using `mean.per.pop.per.activity`)")
