@@ -34,7 +34,9 @@ read.das.crap <- function(file) {
   
   splitted <- strsplit(cleaned.lines, " ( )*", perl=T)
   
-  data <- as.data.frame(do.call("rbind", splitted))
+  as.num.splitted <- lapply(splitted, as.numeric)
+  
+  data <- as.data.frame(do.call("rbind", as.num.splitted))
   
   data
 }
@@ -157,7 +159,34 @@ get.or.compute("personified.data",  {
 get.or.compute("per.activity",  {
   split(personified.data, personified.data$activity)
 })
-library(plyr)
 # then, for each resulting data, take the mean of all variable per subject
-R <- lapply(per.activity, function(DF) ddply(DF, .(pop), function(df) as.data.frame(lapply(df, function(d) {print(class(numeric(d)));mean(d[!is.na(d)])} ) ) ))
-            
+get.or.compute("mean.per.pop.per.activity",  {
+  library(plyr)
+  agg <- function(name, d) {
+    if (name == "pop" | name == "activity") {
+      # even if mean(pop)==pop and mean(activity)==activity in this case...
+      d
+    } else {
+      mean(d[!is.na(d)])      
+    }
+  }
+  df <- function(df) { 
+    as.data.frame(mapply(agg, names(df), df)) 
+  }
+  DF <- function(DF) {
+    ddply(DF, .(pop),  df)
+  }
+  R <- lapply(per.activity, DF)
+  R
+})
+
+if (!file.exists("./data/output")) {
+  dir.create("./data/output")
+}
+write.df <- function(name, df) {
+  write.csv(df, 
+            file=paste("./data/output/", name, ".csv", sep=""),
+            row.names=F
+  )
+}
+mapply(write.df, names(mean.per.pop.per.activity), mean.per.pop.per.activity)
