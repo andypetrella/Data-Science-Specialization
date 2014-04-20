@@ -129,3 +129,35 @@ get.or.compute("full.activity",  {
 
 print("The result of #3 is `full.activity`")
 
+
+get.or.compute("labeled.data",  {
+  cbind(data.full, activity=full.activity)
+})
+
+print("The result of #4 is `labeled.data`")
+
+
+get.or.compute("train.pop",  {
+  read.delim("./data/expanded/UCI\ HAR\ Dataset/train/subject_train.txt", sep="", header=F)
+})
+get.or.compute("test.pop",  {
+  read.delim("./data/expanded/UCI\ HAR\ Dataset/test/subject_test.txt", sep="", header=F)
+})
+get.or.compute("full.pop",  {
+  value <- rbind(train.pop, test.pop)
+  names(value) <- c("pop")
+  value
+})
+get.or.compute("personified.data",  {
+  cbind(labeled.data, full.pop)
+})
+
+
+# split the whole thing by activity
+get.or.compute("per.activity",  {
+  split(personified.data, personified.data$activity)
+})
+library(plyr)
+# then, for each resulting data, take the mean of all variable per subject
+R <- lapply(per.activity, function(DF) ddply(DF, .(pop), function(df) as.data.frame(lapply(df, function(d) {print(class(numeric(d)));mean(d[!is.na(d)])} ) ) ))
+            

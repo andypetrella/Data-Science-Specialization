@@ -9,3 +9,4 @@ specdata
 *.for
 *.Rproj
 *.xml
+.Rproj.user
