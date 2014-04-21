@@ -10,3 +10,4 @@ specdata
 *.Rproj
 *.xml
 .Rproj.user
+.RDataTmp

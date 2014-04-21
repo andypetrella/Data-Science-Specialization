@@ -5,7 +5,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 <meta http-equiv="x-ua-compatible" content="IE=9" >
 
-<title>README</title>
+<title>What&#39;s that all about&hellip;</title>
 
 <style type="text/css">
 body, td {
@@ -142,14 +142,49 @@ hr {
 </head>
 
 <body>
-<h1>README</h1>
+<h1>What&#39;s that all about&hellip;</h1>
 
-<p>TODO:</p>
+<h2>TL;DR</h2>
+
+<p>In this page, you will be introduced with the solution proposed for 
+the first (and only?) peer assessment of the Coursera&#39;s course: <a href="https://class.coursera.org/getdata-002">Getting and Cleaning Data</a> (second take).</p>
+
+<p>This documentation will be brief but yet divided in two folds, being:</p>
+
+<ol>
+<li>a review of the code and an explaination on how to run check the results</li>
+<li>a code book of the last point (create a tidy dataset of all variables average per subject and activity).</li>
+</ol>
+
+<h2>Code: what&#39;s in and how to use it</h2>
+
+<p>The code is pretty (IMHO) straighforward but introduce small peculiarities.
+Two helper functions:</p>
 
 <ul>
-<li>documentation about the code (how to run, what it does)</li>
-<li>small docbook for the &ldquo;tidy&rdquo; dataset generated in <code>data/output</code>.</li>
+<li><code>get.or.compute</code> is there to limit the amount of computations. This function checks if a variable is already present in the current environment, if not it will be created with the result of a given expression &ndash; it was handy when debugging everything in a single file.</li>
+<li><code>rm.rf</code> is a shortcut for <code>rm(list=ls())</code> and was introduce to clean the workspace with less typing &ndash; I&#39;m very lazy <em>:-D</em>.</li>
 </ul>
+
+<p>That means that all intermediary results will be computed only once, unless <code>rm</code> is called on it.</p>
+
+<p>Regarding the logic it self, it merely follows the list of 5 points that the assessment required us to answer.</p>
+
+<p>So each point is reached in a sequence of one or more steps which ends in a dedicated variable holding the result for it. This variable name is printed to the console like this for the first result: <code>print(&quot;The result of #1 is data.full&quot;)</code>, so by running the code, the <code>data.full</code> variable can be inspected easily from the console (f.i. <code>str(data.full)</code>).</p>
+
+<p>Which leads to the question, <em>how the hell could I run it, then</em>. 
+The easiest way to execute it is to stream the script in R, <code>R &lt; run_analysis.R</code>.</p>
+
+<p>The script should be standalone, which means that required packages are checked and installed if needed. So the pane to select the installation server might be requiring an action from you.</p>
+
+<p>The important thing to know is also that a rather big ZIP file will be downloaded from the internet with all the data and doc in it. This ZIP file will be put the <code>data</code> folder and extracted in <code>data/expanded</code>.
+These files were excluded from the github repo to reduce its weight (mostly for who won&#39;t run it&hellip;).</p>
+
+<h2>Code book generated for the 5th point</h2>
+
+<h3>Features</h3>
+
+<h3>Choices</h3>
 
 </body>
 

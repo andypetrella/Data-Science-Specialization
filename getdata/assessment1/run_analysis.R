@@ -167,14 +167,20 @@ get.or.compute("mean.per.pop.per.activity",  {
       # even if mean(pop)==pop and mean(activity)==activity in this case...
       d
     } else {
-      mean(d[!is.na(d)])      
+      mean(d, na.rm=TRUE)
     }
   }
   df <- function(df) { 
-    as.data.frame(mapply(agg, names(df), df)) 
+    #######################################
+    # cannot understand why the f**k 
+    # duplicates are created... probably
+    # because I didn't get ddply fine -_-'
+    # So => unique :-|
+    #######################################
+    unique(as.data.frame(mapply(agg, names(df), df))) 
   }
   DF <- function(DF) {
-    ddply(DF, .(pop),  df)
+    ddply(DF, .(pop), .fun=df)
   }
   R <- lapply(per.activity, DF)
   R
@@ -191,4 +197,4 @@ write.df <- function(name, df) {
 }
 mapply(write.df, names(mean.per.pop.per.activity), mean.per.pop.per.activity)
 
-print("The result of #4 are in the data/output folder (wrote using `mean.per.pop.per.activity`)")
+print("The result of #5 are in the data/output folder (wrote using `mean.per.pop.per.activity`)")
